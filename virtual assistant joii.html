@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JOII- Virtual Assistant</title>
+    <link rel="shortcut icon" href="avatar.png" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;200;300;400;500;600;700&display=swap");
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Roboto Mono", monospace;
+        }
+
+        .main {
+            min-height: 100vh;
+            position: relative;
+            width: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .main.light {
+            background-color: #f4f4f4;
+            color: #000;
+        }
+
+        .main .image-container {
+            padding: 10px;
+        }
+
+        .main .image-container .image {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .main .image-container .image img {
+            width: 350px;
+            align-items: center;
+        }
+
+        .main .image-container h1 {
+            color: #00bcd4;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 40px;
+        }
+
+        .main .image-container p {
+            color: #324042;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .main .input {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 40vw;
+            height: 50px;
+            border-radius: 20px;
+            background: rgb(202 253 255 / 50%);
+        }
+
+        .main .input .talk {
+            background: transparent;
+            outline: none;
+            border: none;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .main .input .talk i {
+            font-size: 20px;
+            color: #aed0d0;
+        }
+
+        .main .input .content {
+            color: #aed0d0;
+            font-size: 15px;
+            margin-right: 20px;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #00bcd4;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .language-select {
+            position: absolute;
+            bottom: 20px; /* Positioning the language selector at the bottom */
+            left: 20px;
+            background-color: #00bcd4;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .language-select select {
+            padding: 5px;
+            font-size: 14px;
+        }
+
+        /* Response box styling */
+        .response-box {
+            background-color: #f4f4f4;
+            padding: 10px;
+            margin: 20px 0;
+            border-radius: 5px;
+            width: 80%;
+            text-align: center;
+        }
+
+        #response {
+            font-size: 18px;
+            color: #324042;
+        }
+    </style>
+</head>
+
+<body>
+    <section class="main" id="main-section">
+        <div class="image-container">
+            <div class="image">
+                <img src="https://i.postimg.cc/VLP6QDmW/ezgif-7-eab1f7d3e7.gif" alt="image">
+            </div>
+            <h1>JOII</h1>
+            <p>I am a Virtual Assistant JOII. How may I help you? Created by the great Charan, founder and creator of JOII.</p>
+        </div>
+        <div class="input">
+            <button class="talk"><i class="fas fa-microphone-alt"></i></button>
+            <h1 class="content">Click here to speak</h1>
+        </div>
+        <!-- Response Box -->
+        <div class="response-box">
+            <p id="response">I am ready to assist you!</p>
+        </div>
+        <!-- Theme Toggle Button -->
+        <button class="theme-toggle" id="theme-toggle">Switch Theme</button>
+        <!-- Language Select -->
+        <div class="language-select">
+            <label for="languages">Choose language: </label>
+            <select id="languages">
+                <option value="en-US">English</option>
+                <option value="hi-IN">Hindi</option>
+                <option value="te-IN">Telugu</option>
+            </select>
+        </div>
+    </section>
+
+    <script>
+        const btn = document.querySelector('.talk');
+        const content = document.querySelector('.content');
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const mainSection = document.getElementById('main-section');
+        const languageSelect = document.getElementById('languages');
+        const responseElement = document.getElementById("response");
+
+        let currentLanguage = 'en-US'; // Default language is English
+        let toDoList = []; // To-Do List array
+
+        // Theme Toggle Function
+        themeToggleBtn.addEventListener('click', () => {
+            mainSection.classList.toggle('light');
+            themeToggleBtn.textContent = mainSection.classList.contains('light') ? 'Switch to Dark Theme' : 'Switch to Light Theme';
+        });
+
+        // Update language based on user selection
+        languageSelect.addEventListener('change', () => {
+            currentLanguage = languageSelect.value;
+            recognition.lang = currentLanguage; // Change the recognition language
+        });
+
+        function speak(text) {
+            window.speechSynthesis.cancel(); // Clear any previous speech
+            const text_speak = new SpeechSynthesisUtterance(text);
+
+            text_speak.rate = 1;
+            text_speak.volume = 1;
+            text_speak.pitch = 1;
+            text_speak.lang = currentLanguage; // Speak in the selected language
+
+            window.speechSynthesis.speak(text_speak);
+        }
+
+        function updateResponse(text) {
+            responseElement.textContent = text;
+        }
+
+        function wishMe() {
+            var day = new Date();
+            var hour = day.getHours();
+
+            if (hour >= 0 && hour < 12) {
+                speak("Good Morning Boss...");
+            } else if (hour >= 12 && hour < 17) {
+                speak("Good Afternoon Master...");
+            } else {
+                speak("Good Evening Sir...");
+            }
+        }
+
+        window.addEventListener('load', () => {
+            speak("Initializing JOII...");
+            wishMe();
+        });
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.lang = currentLanguage; // Set initial language to English
+
+        recognition.onresult = (event) => {
+            const currentIndex = event.resultIndex;
+            const transcript = event.results[currentIndex][0].transcript;
+            content.textContent = transcript;
+            takeCommand(transcript.toLowerCase());
+        };
+
+        btn.addEventListener('click', () => {
+            content.textContent = "Listening...";
+            recognition.start();
+        });
+
+        function takeCommand(message) {
+            // Greeting response
+            if (message.includes('hello')) {
+                const reply = "Hello! How can I help you today?";
+                updateResponse(reply);
+                speak(reply);
+            }
+            // Opening websites
+            else if (message.includes("open google")) {
+                window.open("https://google.com", "_blank");
+                speak("Opening Google...");
+                updateResponse("Opening Google...");
+            }
+            else if (message.includes("open youtube")) {
+                window.open("https://youtube.com", "_blank");
+                speak("Opening Youtube...");
+                updateResponse("Opening YouTube...");
+            }
+            else if (message.includes("open facebook")) {
+                window.open("https://facebook.com", "_blank");
+                speak("Opening Facebook...");
+                updateResponse("Opening Facebook...");
+            }
+            // Jokes
+            else if (message.includes("tell me a joke")) {
+                const jokes = [
+                    "Why don’t skeletons fight each other? They don’t have the guts.",
+                    "What do you call fake spaghetti? An impasta."
+                ];
+                const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
+                speak(randomJoke);
+                updateResponse(randomJoke);
+            }
+            // Simple Math Calculations
+            else if (message.includes("calculate")) {
+                try {
+                    const expression = message.replace("calculate", "").trim();
+                    const result = eval(expression);
+                    speak(`The result is ${result}`);
+                    updateResponse(`The result is ${result}`);
+                } catch {
+                    speak("I cannot compute that.");
+                    updateResponse("I cannot compute that.");
+                }
+            }
+            // To-Do List commands
+            else if (message.includes("add to my to-do list")) {
+                const item = message.replace("add to my to-do list", "").trim();
+                if (item) {
+                    toDoList.push(item);
+                    speak(`${item} added to your to-do list.`);
+                    updateResponse(`${item} added to your to-do list.`);
+                } else {
+                    speak("Please specify what to add.");
+                    updateResponse("Please specify what to add.");
+                }
+            } else if (message.includes("show my to-do list")) {
+                if (toDoList.length > 0) {
+                    const items = toDoList.join(", ");
+                    speak(`Here are the items on your to-do list: ${items}`);
+                    updateResponse(`To-Do List: ${items}`);
+                } else {
+                    speak("Your to-do list is empty.");
+                    updateResponse("Your to-do list is empty.");
+                }
+            } else if (message.includes("clear my to-do list")) {
+                toDoList = [];
+                speak("Your to-do list has been cleared.");
+                updateResponse("Your to-do list has been cleared.");
+            }
+            // Weather Information (example)
+            else if (message.includes("what's the weather")) {
+                speak("Checking the weather for you...");
+                updateResponse("Checking the weather...");
+                // In real implementation, here you would fetch weather data from an API
+                // Example response for demo
+                speak("It is currently sunny with a temperature of 25 degrees Celsius.");
+                updateResponse("It is currently sunny with a temperature of 25°C.");
+            }
+            // Time & Date
+            else if (message.includes('time')) {
+                const time = new Date().toLocaleString(undefined, { hour: "numeric", minute: "numeric" });
+                const finalText = "The current time is " + time;
+                speak(finalText);
+                updateResponse(finalText);
+            } else if (message.includes('date')) {
+                const date = new Date().toLocaleString(undefined, { month: "short", day: "numeric", year: "numeric" });
+                const finalText = "Today's date is " + date;
+                speak(finalText);
+                updateResponse(finalText);
+            }
+            // Wikipedia Search
+            else if (message.includes('wikipedia')) {
+                const query = message.replace("wikipedia", "").trim();
+                if (query) {
+                    window.open(`https://en.wikipedia.org/wiki/${query}`, "_blank");
+                    speak(`This is what I found on Wikipedia for ${query}`);
+                    updateResponse(`Searching Wikipedia for ${query}`);
+                } else {
+                    speak("Please specify what to search on Wikipedia.");
+                    updateResponse("Please specify what to search on Wikipedia.");
+                }
+            }
+            // Web Search
+            else {
+                window.open(`https://www.google.com/search?q=${message.replace(" ", "+")}`, "_blank");
+                const finalText = "Here are the search results for " + message;
+                speak(finalText);
+                updateResponse(finalText);
+            }
+        }
+    </script>
+</body>
+
+</html>
